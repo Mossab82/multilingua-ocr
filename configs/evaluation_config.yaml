@@ -1,0 +1,94 @@
+# Evaluation configuration from Section 5
+evaluation:
+  # Batch Processing
+  batch_size: 32
+  num_workers: 4
+
+  # Model Loading
+  model:
+    checkpoint: "best_model.pth"
+    strict_loading: true
+
+  # Metrics Configuration
+  metrics:
+    # Character Error Rate
+    cer:
+      enabled: true
+      normalize: true
+      ignore_case: false
+      ignore_punctuation: true
+
+    # Semantic Preservation Score
+    sps:
+      enabled: true
+      similarity_threshold: 0.8
+      use_contextual: true
+
+    # Cultural Concept Accuracy
+    cca:
+      enabled: true
+      min_confidence: 0.85
+      require_context: true
+
+    # Script Classification
+    script:
+      enabled: true
+      confusion_matrix: true
+      per_language_metrics: true
+
+  # Results Visualization
+  visualization:
+    enabled: true
+    save_attention_maps: true
+    save_degradation_maps: true
+    plot_metrics: true
+    save_confusion_matrix: true
+    dpi: 300
+    figure_format: "png"
+
+  # Error Analysis
+  error_analysis:
+    enabled: true
+    save_error_samples: true
+    max_samples: 100
+    categorize_errors: true
+    error_categories:
+      - "script_confusion"
+      - "degradation"
+      - "cultural_context"
+      - "language_boundary"
+
+  # Output Configuration
+  output:
+    save_predictions: true
+    save_metrics: true
+    generate_report: true
+    report_format: "pdf"
+    include_plots: true
+    include_examples: true
+
+  # Language-Specific Evaluation
+  languages:
+    Spanish-Nahuatl:
+      specific_metrics: true
+      cultural_terms_file: "nahuatl_terms.txt"
+    Spanish-Mixtec:
+      specific_metrics: true
+      cultural_terms_file: "mixtec_terms.txt"
+    Spanish-Zapotec:
+      specific_metrics: true
+      cultural_terms_file: "zapotec_terms.txt"
+
+  # Performance Analysis
+  analysis:
+    degradation_levels:
+      - "none"
+      - "low"
+      - "medium"
+      - "high"
+    cross_lingual_evaluation: true
+    ablation_study:
+      components:
+        - "script_attention"
+        - "cultural_mapping"
+        - "degradation_analysis"
