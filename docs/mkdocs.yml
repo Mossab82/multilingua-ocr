@@ -1,0 +1,55 @@
+site_name: MultiLingua-OCR Documentation
+site_description: Documentation for MultiLingua-OCR framework
+site_author: Mossab Ibrahim
+theme:
+name: material
+features:
+- navigation.tabs
+- navigation.sections
+- navigation.expand
+- search.suggest
+- search.highlight
+nav:
+
+Home: index.md
+API Reference:
+
+Core: api/core.md
+Preprocessing: api/preprocessing.md
+Models: api/models.md
+
+
+Guides:
+
+Installation: guides/installation.md
+Quick Start: guides/quickstart.md
+Model Training: guides/model_training.md
+Evaluation: guides/evaluation.md
+
+
+Cultural:
+
+Ontology: cultural/ontology.md
+Guidelines: cultural/guidelines.md
+
+
+
+markdown_extensions:
+
+admonition
+codehilite
+footnotes
+toc:
+permalink: true
+pymdownx.highlight
+pymdownx.superfences
+
+plugins:
+
+search
+mkdocstrings:
+handlers:
+python:
+setup_commands:
+- import sys
+- sys.path.append(".")
