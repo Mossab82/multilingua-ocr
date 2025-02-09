@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "multilingua_ocr"
+dynamic = ["version"]
+description = "Framework for Spanish-Indigenous historical document OCR"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+{name = "Mossab Ibrahim", email = "ventura@cs.byu.edu"}
+]
+classifiers = [
+"Development Status :: 4 - Beta",
+"Intended Audience :: Science/Research",
+"License :: OSI Approved :: MIT License",
+"Programming Language :: Python :: 3",
+"Programming Language :: Python :: 3.8",
+"Programming Language :: Python :: 3.9",
+"Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+"torch>=2.0.0",
+"torchvision>=0.15.0",
+"transformers>=4.28.0",
+"Pillow>=9.5.0",
+"opencv-python>=4.7.0.72",
+"numpy>=1.24.3",
+"pandas>=2.0.1",
+"PyYAML>=6.0",
+]
+[project.optional-dependencies]
+dev = [
+"pytest>=7.3.1",
+"pytest-cov>=4.0.0",
+"black>=22.3.0",
+"isort>=5.10.1",
+"flake8>=4.0.1",
+"mypy>=0.981",
+]
+[tool.setuptools]
+packages = ["multilingua_ocr"]
+[tool.setuptools_scm]
+write_to = "multilingua_ocr/_version.py"
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39"]
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
