@@ -1,0 +1,46 @@
+# Default configuration based on Section 3.2 and 4.2
+model:
+  # Model Architecture
+  hidden_size: 768
+  num_attention_heads: 12
+  num_encoder_layers: 6
+  num_decoder_layers: 6
+  dropout_rate: 0.1
+  max_sequence_length: 512
+
+  # Script-Aware Attention
+  use_script_attention: true
+  script_embedding_dim: 64
+
+  # Cultural-Semantic Framework
+  cultural_embedding_dim: 256
+  ontology_size: 1000
+  language_pairs:
+    - ["Spanish", "Nahuatl"]
+    - ["Spanish", "Mixtec"]
+    - ["Spanish", "Zapotec"]
+
+# Data Processing
+preprocessing:
+  target_height: 1024
+  target_width: 768
+  normalize_contrast: true
+  remove_background: true
+  analyze_degradation: true
+  degradation_threshold: 0.3
+
+# Loss Functions
+loss:
+  ocr_weight: 1.0
+  cultural_weight: 0.5
+  script_weight: 0.3
+
+# Metrics Thresholds
+metrics:
+  min_cer: 0.15
+  min_sps: 0.80
+  min_cca: 0.80
+
+# System
+device: "cuda"
+seed: 42
