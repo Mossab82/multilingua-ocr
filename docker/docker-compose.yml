@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  multilingua-ocr:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: multilingua-ocr:latest
+    container_name: multilingua-ocr
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ../data:/app/data
+      - ../models:/app/models
+      - ../configs:/app/configs
+      - ../results:/app/results
+    ports:
+      - "8888:8888"  # For Jupyter notebooks
+    command: bash -c "jupyter lab --ip 0.0.0.0 --port 8888 --no-browser --allow-root --NotebookApp.token=''"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # Service for distributed training
+  multilingua-ocr-distributed:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: multilingua-ocr:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ../data:/app/data
+      - ../models:/app/models
+      - ../configs:/app/configs
+      - ../results:/app/results
+    deploy:
+      replicas: 4  # Number of GPU workers
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1  # GPUs per worker
+              capabilities: [gpu]
+
+  # Service for evaluation
+  multilingua-ocr-eval:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: multilingua-ocr:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ../data:/app/data
+      - ../models:/app/models
+      - ../configs:/app/configs
+      - ../results:/app/results
+    command: >
+      python multilingua_ocr/scripts/evaluate.py
+        --model-path /app/models/best_model.pth
+        --data-dir /app/data/test
+        --output-dir /app/results/evaluation
