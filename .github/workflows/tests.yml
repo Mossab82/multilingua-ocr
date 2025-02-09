@@ -1,0 +1,243 @@
+name: MultiLingua-OCR Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+        gpu: [nvidia-tesla-v100, nvidia-tesla-t4]
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install CUDA dependencies
+      run: |
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+        sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+        sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+        sudo apt-get update
+        sudo apt-get install cuda
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-benchmark
+    
+    - name: Run OCR core tests
+      run: |
+        pytest tests/test_ocr_core.py --cov=multilingua_ocr/core
+    
+    - name: Run cultural mapping tests
+      run: |
+        pytest tests/test_cultural_mapping.py --cov=multilingua_ocr/models/cultural_mapping
+    
+    - name: Run performance benchmarks
+      run: |
+        pytest tests/benchmarks/ --benchmark-only
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v2
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        fail_ci_if_error: true
+
+# Lint Workflow (.github/workflows/lint.yml)
+```yaml
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy pylint
+    
+    - name: Check code style
+      run: |
+        black --check multilingua_ocr tests
+        isort --check-only multilingua_ocr tests
+    
+    - name: Run linters
+      run: |
+        flake8 multilingua_ocr tests --max-line-length=88 --extend-ignore=E203
+        mypy multilingua_ocr
+        pylint multilingua_ocr --disable=C0111,R0903
+
+# Docker Build Workflow (.github/workflows/docker-build.yml)
+```yaml
+name: Docker Build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./docker/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: |
+          multilingua/ocr:latest
+          multilingua/ocr:${{ github.sha }}
+        build-args: |
+          CUDA_VERSION=11.4.0
+          PYTORCH_VERSION=2.0.0
+        cache-from: type=registry,ref=multilingua/ocr:buildcache
+        cache-to: type=registry,ref=multilingua/ocr:buildcache,mode=max
+
+# Contributing Guidelines (.github/CONTRIBUTING.md)
+# Contributing to MultiLingua-OCR
+
+## Overview
+MultiLingua-OCR is a framework for processing historical Spanish-Indigenous documents using advanced OCR techniques and cultural preservation methods. This guide outlines how to contribute while maintaining our research standards.
+
+## Technical Requirements
+
+### Core Components
+1. Script-Aware Attention Mechanism
+```python
+def script_aware_attention(query, key, value, mask=None):
+    """
+    Implements the script-aware attention mechanism described in Section 3.2
+    
+    Parameters:
+        query: Tensor of shape [batch_size, num_heads, seq_len, d_k]
+        key, value: Tensors of shape [batch_size, num_heads, seq_len, d_k]
+        mask: Optional script compatibility mask
+    """
+ 2. Cultural-Semantic Framework
+ def cultural_mapping(tokens, language_pair):
+    """
+    Maps tokens to their cultural-semantic representations
+    
+    Parameters:
+        tokens: List of input tokens
+        language_pair: Tuple of (source_lang, target_lang)
+    """
+    Performance Requirements
+
+Character Error Rate (CER) < 15%
+Semantic Preservation Score (SPS) > 0.8
+Cultural Concept Accuracy (CCA) > 80%
+Processing speed > 1,000 pages/hour on Tesla V100
+
+Development Process
+Setting Up Development Environment
+
+1. Install dependencies:
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install core dependencies
+pip install -r requirements.txt
+
+# Install development dependencies
+pip install -r requirements-dev.txt
+2. Configure pre-commit hooks:
+pre-commit install
+
+Running Tests
+# Run core tests
+pytest tests/test_ocr_core.py
+
+# Run cultural mapping tests
+pytest tests/test_cultural_mapping.py
+
+# Run performance benchmarks
+pytest tests/benchmarks/
+
+Code Style
+
+Follow PEP 8 guidelines
+Use type hints for all functions
+Document using NumPy docstring format
+Include cultural preservation considerations in comments
+
+Pull Request Process
+
+Branch naming convention:
+
+feature/description
+fix/description
+docs/description
+
+
+Required PR information:
+
+Performance metrics on test dataset
+Cultural preservation impact
+Documentation updates
+
+
+Review criteria:
+
+Code quality and style
+Test coverage (minimum 80%)
+Performance benchmarks
+Cultural preservation aspects
+
+
+
+Research Integrity
+
+Maintain reproducibility of results
+Document all experimental configurations
+Preserve test dataset integrity
+Follow ethical guidelines for Indigenous language processing
+
+License
+By contributing, you agree that your contributions will be licensed under the MIT License.
