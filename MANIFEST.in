@@ -1,0 +1,13 @@
+include LICENSE
+include README.md
+include requirements.txt
+include multilingua_ocr/py.typed
+recursive-include configs *.yaml
+recursive-include docker *
+recursive-include scripts *.sh
+recursive-include tests *
+recursive-include docs *
+recursive-include notebooks *.ipynb
+recursive-exclude * pycache
+recursive-exclude * *.py[cod]
+recursive-exclude * *.so
