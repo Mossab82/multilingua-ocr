@@ -1,1 +1,0 @@
-# multilingua-ocr
